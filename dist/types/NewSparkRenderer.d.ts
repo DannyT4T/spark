@@ -52,10 +52,10 @@ export interface NewSparkRendererOptions {
      */
     maxPixelRadius?: number;
     /**
-     * Whether to use extended Gsplat encoding for intermediary splats.
+     * Whether to use extended Gsplat encoding for intermediary accumulator splats.
      * @default false
      */
-    extSplats?: boolean;
+    accumExtSplats?: boolean;
     /**
      * Whether to use covariance Gsplat encoding for intermediary splats.
      * @default false
@@ -162,10 +162,20 @@ export interface NewSparkRendererOptions {
     lodRenderScale?: number;
     globalLodScale?: number;
     /**
+     * Whether to use extended Gsplat encoding for paged splats.
+     * @default false
+     */
+    pagedExtSplats?: boolean;
+    /**
      * Allocation size of paged splats
      * @default 16777216
      */
     maxPagedSplats?: number;
+    /**
+     * Number of parallel chunk fetchers for LoD.
+     * @default 3
+     */
+    numLodFetchers?: number;
     outsideFoveate?: number;
     behindFoveate?: number;
     coneFov0?: number;
@@ -214,7 +224,7 @@ export declare class NewSparkRenderer extends THREE.Mesh {
     maxStdDev: number;
     minPixelRadius: number;
     maxPixelRadius: number;
-    extSplats: boolean;
+    accumExtSplats: boolean;
     covSplats: boolean;
     minAlpha: number;
     enable2DGS: boolean;
@@ -253,7 +263,9 @@ export declare class NewSparkRenderer extends THREE.Mesh {
     lodSplatScale: number;
     lodRenderScale: number;
     globalLodScale: number;
+    pagedExtSplats: boolean;
     maxPagedSplats: number;
+    numLodFetchers: number;
     outsideFoveate: number;
     behindFoveate: number;
     coneFov0: number;
@@ -274,6 +286,7 @@ export declare class NewSparkRenderer extends THREE.Mesh {
     lodInitQueue: (PackedSplats | ExtSplats | PagedSplats)[];
     lodPos: THREE.Vector3;
     lodQuat: THREE.Quaternion;
+    lodTimestamp: number;
     lodInstances: Map<SplatMesh, {
         lodId: number;
         numSplats: number;
@@ -287,6 +300,7 @@ export declare class NewSparkRenderer extends THREE.Mesh {
         count: number;
         lodTreeData?: Uint32Array;
     }[];
+    lastTraverseTime: number;
     pager?: SplatPager;
     pagerId: number;
     target?: THREE.WebGLRenderTarget;

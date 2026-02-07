@@ -1,12 +1,14 @@
 import { dyno } from '.';
-import { SplatEncoding } from './PackedSplats';
 import { SplatSource } from './SplatMesh';
+import { ExtResult, PackedResult, RadMeta, SplatEncoding, SplatFileType } from './defines';
 import * as THREE from "three";
 export interface PagedSplatsOptions {
     pager?: SplatPager;
-    rootUrl: string;
+    rootUrl?: string;
     requestHeader?: Record<string, string>;
     withCredentials?: boolean;
+    fileBytes?: Uint8Array;
+    fileType?: SplatFileType;
     maxSh?: number;
 }
 export declare class PagedSplats implements SplatSource {
@@ -14,23 +16,31 @@ export declare class PagedSplats implements SplatSource {
     rootUrl: string;
     requestHeader?: Record<string, string>;
     withCredentials?: boolean;
+    fileBytes?: Uint8Array;
+    fileType?: SplatFileType;
     numSh: number;
     maxSh: number;
     numSplats: number;
     splatEncoding?: SplatEncoding;
+    radMetaPromise?: Promise<{
+        meta: RadMeta;
+        chunksStart: number;
+    }>;
     dynoNumSplats: dyno.DynoInt<"numSplats">;
     dynoIndices: dyno.DynoUsampler2D<"indices", THREE.DataTexture>;
     rgbMinMaxLnScaleMinMax: dyno.DynoVec4<THREE.Vector4, "rgbMinMaxLnScaleMinMax">;
     lodOpacity: dyno.DynoBool<"lodOpacity">;
     dynoNumSh: dyno.DynoInt<"numSh">;
-    sh1MidScale: dyno.DynoUniform<"vec2", "sh1MidScale", THREE.Vector2>;
-    sh2MidScale: dyno.DynoUniform<"vec2", "sh2MidScale", THREE.Vector2>;
-    sh3MidScale: dyno.DynoUniform<"vec2", "sh3MidScale", THREE.Vector2>;
+    shMax: dyno.DynoVec3<THREE.Vector3, "shMax">;
     constructor(options: PagedSplatsOptions);
     dispose(): void;
     setMaxSh(maxSh: number): void;
+    getRadMeta(): Promise<{
+        meta: RadMeta;
+        chunksStart: number;
+    }>;
     chunkUrl(chunk: number): string;
-    fetchDecodeChunk(chunk: number): Promise<PackedResult>;
+    fetchDecodeChunk(chunk: number): Promise<PackedResult | ExtResult>;
     update(numSplats: number, indices: Uint32Array): void;
     prepareFetchSplat(): void;
     getNumSplats(): number;
@@ -41,17 +51,16 @@ export declare class PagedSplats implements SplatSource {
         viewOrigin?: dyno.DynoVal<"vec3">;
     }): dyno.DynoVal<typeof dyno.Gsplat>;
 }
-export type PackedResult = {
-    numSplats: number;
-    packedArray: Uint32Array;
-    extra: Record<string, unknown>;
-    splatEncoding: SplatEncoding;
-};
 export interface SplatPagerOptions {
     /**
      * THREE.WebGLRenderer instance to upload texture data
      */
     renderer: THREE.WebGLRenderer;
+    /**
+     * Whether to use extended Gsplat encoding for paged splats.
+     * @default false
+     */
+    extSplats?: boolean;
     /**
      * Maximum size of splat page pool
      * @default 65536 * 256 = 16777216
@@ -75,6 +84,7 @@ export interface SplatPagerOptions {
 }
 export declare class SplatPager {
     renderer: THREE.WebGLRenderer;
+    extSplats: boolean;
     maxPages: number;
     maxSplats: number;
     pageSplats: number;
@@ -100,12 +110,14 @@ export declare class SplatPager {
         page: number;
         numSplats: number;
         packedArray: Uint32Array;
+        extArray?: Uint32Array;
         extra: Record<string, unknown>;
     }[];
     readyUploads: {
         page: number;
         numSplats: number;
         packedArray: Uint32Array;
+        extArray?: Uint32Array;
         extra: Record<string, unknown>;
     }[];
     lodTreeUpdates: {
@@ -123,16 +135,18 @@ export declare class SplatPager {
     fetched: {
         splats: PagedSplats;
         chunk: number;
-        data: PackedResult;
+        data: PackedResult | ExtResult;
     }[];
     fetchPriority: {
         splats: PagedSplats;
         chunk: number;
     }[];
     packedTexture: dyno.DynoUsampler2DArray<"packedTexture", THREE.DataArrayTexture>;
+    extTexture: dyno.DynoUsampler2DArray<"extTexture", THREE.DataArrayTexture>;
     sh1Texture: dyno.DynoUsampler2DArray<"sh1", THREE.DataArrayTexture>;
     sh2Texture: dyno.DynoUsampler2DArray<"sh2", THREE.DataArrayTexture>;
     sh3Texture: dyno.DynoUsampler2DArray<"sh3", THREE.DataArrayTexture>;
+    sh3TextureB: dyno.DynoUsampler2DArray<"sh3b", THREE.DataArrayTexture>;
     readIndex: dyno.DynoBlock<{
         index: "int";
         numSplats: "int";
@@ -147,15 +161,25 @@ export declare class SplatPager {
     }, {
         gsplat: typeof dyno.Gsplat;
     }>;
+    readSplatExt: dyno.DynoBlock<{
+        index: "int";
+    }, {
+        gsplat: typeof dyno.Gsplat;
+    }>;
     readSplatDir: dyno.DynoBlock<{
         index: "int";
         rgbMinMaxLnScaleMinMax: "vec4";
         lodOpacity: "bool";
         viewOrigin: "vec3";
         numSh: "int";
-        sh1MidScale: "vec2";
-        sh2MidScale: "vec2";
-        sh3MidScale: "vec2";
+        shMax: "vec3";
+    }, {
+        gsplat: typeof dyno.Gsplat;
+    }>;
+    readSplatExtDir: dyno.DynoBlock<{
+        index: "int";
+        viewOrigin: "vec3";
+        numSh: "int";
     }, {
         gsplat: typeof dyno.Gsplat;
     }>;
@@ -188,7 +212,12 @@ export declare class SplatPager {
     static emptyUint32x2: THREE.DataArrayTexture;
     static emptyIndicesTexture: THREE.DataTexture;
     static emptyPackedTexture: THREE.DataArrayTexture;
+    static emptyExtTexture: THREE.DataArrayTexture;
     static emptySh1Texture: THREE.DataArrayTexture;
     static emptySh2Texture: THREE.DataArrayTexture;
     static emptySh3Texture: THREE.DataArrayTexture;
+    static emptyExtSh1Texture: THREE.DataArrayTexture;
+    static emptyExtSh2Texture: THREE.DataArrayTexture;
+    static emptyExtSh3Texture: THREE.DataArrayTexture;
+    static emptyExtSh3BTexture: THREE.DataArrayTexture;
 }

@@ -177,15 +177,12 @@ export declare function decodeQuatEulerXyz888(encoded: number, out: THREE.Quater
 export declare function encodeQuatOctXy1010R12(qx: number, qy: number, qz: number, qw: number): number;
 export declare function decodeQuatOctXy1010R12(encoded: number, out: THREE.Quaternion): THREE.Quaternion;
 export declare function encodeSh1Rgb(sh1Array: Uint32Array, index: number, sh1Rgb: Float32Array, encoding?: {
-    sh1Min?: number;
     sh1Max?: number;
 }): void;
 export declare function encodeSh2Rgb(sh2Array: Uint32Array, index: number, sh2Rgb: Float32Array, encoding?: {
-    sh2Min?: number;
     sh2Max?: number;
 }): void;
 export declare function encodeSh3Rgb(sh3Array: Uint32Array, index: number, sh3Rgb: Float32Array, encoding?: {
-    sh3Min?: number;
     sh3Max?: number;
 }): void;
 export declare function encodeExtRgb(r: number, g: number, b: number): number;

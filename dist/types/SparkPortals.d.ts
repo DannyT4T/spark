@@ -95,6 +95,8 @@ export declare class SparkPortals {
     portalCrossEps: number;
     /** Used to detect crossing between frames */
     private lastCameraWorld;
+    /** Whether portal LoD prefetch is currently enabled */
+    private prefetchActive;
     private scratch;
     constructor(options: SparkPortalsOptions);
     /**

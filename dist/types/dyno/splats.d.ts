@@ -48,6 +48,8 @@ export declare const transformGsplat: (gsplat: DynoVal<typeof Gsplat>, { scale, 
     translate?: DynoVal<"vec3">;
     recolor?: DynoVal<"vec4">;
 }) => DynoVal<typeof Gsplat>;
+export declare const splatTexCoord: (index: DynoVal<"int">) => DynoVal<"ivec3">;
+export declare const pagedSplatTexCoord: (index: DynoVal<"int">) => DynoVal<"ivec3">;
 export declare const defineGsplat: string;
 export declare const defineCovSplat: string;
 export declare const definePackedSplats: string;
@@ -284,4 +286,24 @@ export declare class CombineCovSplat extends Dyno<{
         b?: DynoVal<"float">;
     });
     dynoOut(): DynoValue<typeof CovSplat>;
+}
+export declare class SplatTexCoord extends Dyno<{
+    index: "int";
+}, {
+    coord: "ivec3";
+}> implements HasDynoOut<"ivec3"> {
+    constructor({ index }: {
+        index?: DynoVal<"int">;
+    });
+    dynoOut(): DynoValue<"ivec3">;
+}
+export declare class PagedSplatTexCoord extends Dyno<{
+    index: "int";
+}, {
+    coord: "ivec3";
+}> implements HasDynoOut<"ivec3"> {
+    constructor({ index }: {
+        index?: DynoVal<"int">;
+    });
+    dynoOut(): DynoValue<"ivec3">;
 }

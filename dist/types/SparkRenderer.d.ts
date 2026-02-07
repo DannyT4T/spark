@@ -1,8 +1,8 @@
-import { SplatEncoding } from './PackedSplats';
 import { RgbaArray } from './RgbaArray';
 import { SparkViewpoint, SparkViewpointOptions } from './SparkViewpoint';
 import { SplatAccumulator } from './SplatAccumulator';
 import { SplatGenerator } from './SplatGenerator';
+import { SplatEncoding } from './defines';
 import * as THREE from "three";
 export type SparkRendererOptions = {
     /**

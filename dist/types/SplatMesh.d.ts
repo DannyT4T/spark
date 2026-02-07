@@ -1,11 +1,11 @@
 import { ExtSplats } from './ExtSplats';
-import { PackedSplats, SplatEncoding } from './PackedSplats';
+import { PackedSplats } from './PackedSplats';
 import { RgbaArray, TRgbaArray } from './RgbaArray';
 import { SplatEdit, SplatEdits } from './SplatEdit';
 import { CovSplatModifier, CovSplatTransformer, FrameUpdateContext, GsplatModifier, SplatGenerator, SplatTransformer } from './SplatGenerator';
-import { SplatFileType } from './SplatLoader';
 import { PagedSplats, SplatPager } from './SplatPager';
 import { SplatSkinning } from './SplatSkinning';
+import { SplatEncoding, SplatFileType } from './defines';
 import { DynoBool, DynoFloat, DynoInt, DynoUsampler2D, DynoVal, DynoVec4, Gsplat } from './dyno';
 import * as THREE from "three";
 export type SplatMeshOptions = {

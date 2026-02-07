@@ -1,7 +1,8 @@
 import { FileLoader, Loader, LoadingManager } from 'three';
 import { ExtSplats } from './ExtSplats';
-import { PackedSplats, SplatEncoding } from './PackedSplats';
+import { PackedSplats } from './PackedSplats';
 import { SplatMesh } from './SplatMesh';
+import { SplatEncoding, SplatFileType } from './defines';
 export declare class SplatLoader extends Loader {
     fileLoader: FileLoader;
     static lod: boolean;
@@ -36,14 +37,6 @@ export declare class SplatLoader extends Loader {
         nonLod?: boolean | "wait";
         lodBase?: number;
     }): Promise<unknown>;
-}
-export declare enum SplatFileType {
-    PLY = "ply",
-    SPZ = "spz",
-    SPLAT = "splat",
-    KSPLAT = "ksplat",
-    PCSOGS = "pcsogs",
-    PCSOGSZIP = "pcsogszip"
 }
 export declare function getSplatFileType(fileBytes: Uint8Array): SplatFileType | undefined;
 export declare function getFileExtension(pathOrUrl: string): string;
