@@ -1,224 +1,152 @@
 <p align="center">
+  <img src="https://img.shields.io/badge/A--Frame-1.7.1-blue" alt="A-Frame">
+  <img src="https://img.shields.io/badge/Three.js-r173-green" alt="Three.js">
+  <img src="https://img.shields.io/badge/WASM-accelerated-orange" alt="WASM">
+  <img src="https://img.shields.io/badge/license-MIT-brightgreen" alt="License">
+</p>
 
-  ![Spark logo](https://github.com/user-attachments/assets/5287631a-083c-4c86-80f6-4dca24aa263f#gh-light-mode-only)
-  ![Spark logo](https://github.com/user-attachments/assets/91e8d74b-84a5-4073-bd72-d7228f948dc6#gh-dark-mode-only)
+# A-Spark ✨
 
-  <h3 align="center">An advanced 3D Gaussian Splatting renderer for THREE.js</h3>
-  <div align="center">
+**Gaussian Splatting for A-Frame** — Render high-quality 3D Gaussian Splats in any A-Frame WebXR scene.
 
-  [Features](#features) -
-  [Getting Started](#getting-started) -
-  <a href="https://sparkjs.dev/">Documentation</a> -
-  <a href="https://sparkjs.dev/">FAQ</a>
-  </div>
-  </p>
+A-Spark wraps [Spark.js](https://github.com/sparkjsdev/spark) (a production-grade Gaussian Splat renderer with WASM-accelerated sorting) as a native A-Frame component. Load `.spz`, `.ply`, or `.splat` files with a single HTML tag.
 
-   <div align="center">
+---
 
-  [![License](https://img.shields.io/badge/license-MIT-%23d43e4c)](https://github.com/sparkjsdev/spark/blob/main/LICENSE)
-  [![npm version](https://img.shields.io/npm/v/@sparkjsdev/spark?color=d43e4c)](https://www.npmjs.com/package/@sparkjsdev/spark)
+## Quick Start
 
-  </div>
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- 1. Load A-Frame -->
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+    
+    <!-- 2. Load A-Spark -->
+    <script src="https://a-spark.xrcl.app/a-spark.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity
+        gaussian-splat="url: https://example.com/scene.spz"
+        position="0 0 -3"
+      ></a-entity>
+    </a-scene>
+  </body>
+</html>
+```
 
-<p>
-  <a href="https://sparkjs.dev" target="_blank">
-    <picture>
-    </picture>
-  </a>
+That's it. Two script tags and one component. 🚀
 
-> ## Spark 2.0 Preview
-> 
-> Spark 2.0 Developer Preview is now available!
-> - [Read the docs](https://sparkjs.dev/2.0.0-preview/docs/)
-> - [Check out the preview branch](https://github.com/sparkjsdev/spark/tree/v2.0.0-preview)
-> 
-> Version 2.0 is a major rewrite of the renderer to enable huge worlds made of dynamic 3D Gaussian Splats. It's a complete solution for creating, streaming, and rendering huge 3DGS worlds on the web on any device. It is mostly backward compatible with with Spark 0.1.*.
-> 
-> Read about all the [New Features in 2.0](https://sparkjs.dev/2.0.0-preview/docs/new-features-2.0/), learn how to migrate in our [1.0 → 2.0 Migration Guide](https://sparkjs.dev/2.0.0-preview/docs/0.1-2.0-migration-guide/), and get started quick with our [Level-of-Detail system](https://sparkjs.dev/2.0.0-preview/docs/lod-getting-started/).
-
-> New [Spark 2.0 examples](https://sparkjs.dev/2.0.0-preview/examples/) have been added, including [huge streaming LoD worlds](https://sparkjs.dev/2.0.0-preview/examples/#streaming-lod) and [streaming multiple simultaneous LoD worlds](https://sparkjs.dev/2.0.0-preview/examples/#multi-lod).
+---
 
 ## Features
 
-- Integrates with THREE.js rendering pipeline to fuse splat and mesh-based objects
-- Portable: Works across almost all devices, targeting 98%+ WebGL2 support
-- Renders fast even on low-powered mobile devices
-- Render multiple splat objects together with correct sorting
-- Most major splat file formats supported including: [.PLY](https://github.com/graphdeco-inria/gaussian-splatting) (also [compressed](https://blog.playcanvas.com/compressing-gaussian-splats/#compressed-ply-format)), [.SPZ](https://github.com/nianticlabs/spz), [.SPLAT](https://github.com/antimatter15/splat), [.KSPLAT](https://github.com/mkkellogg/GaussianSplats3D), [.SOG](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/)
-- Render multiple viewpoints simultaneously
-- Fully dynamic: each splat can be transformed and edited for animation
-- Real-time splat color editing, displacement, and skeletal animation
-- Shader graph system to dynamically create/edit splats on the GPU
+| Feature | Details |
+|---|---|
+| **File Formats** | `.spz` (compressed), `.ply`, `.splat` |
+| **WASM Sorting** | Rust-compiled WebAssembly for fast splat sorting |
+| **Spherical Harmonics** | View-dependent lighting effects |
+| **A-Frame Native** | Full component lifecycle, works with ECS |
+| **WebXR Ready** | Works on Quest 3 and other XR devices |
+| **Lightweight** | ~575KB minified (~150KB gzipped) |
+| **Zero Config** | Uses A-Frame's bundled Three.js r173 — no conflicts |
 
-Check out all the [examples](https://sparkjs.dev/examples/)
+---
 
-## Getting Started
-
-### Copy Code
-
-Copy the following code into an `index.html` file.
-
+## Component Properties
 
 ```html
-<style> body {margin: 0;} </style>
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.178.0/three.module.js",
-      "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/0.1.10/spark.module.js"
-    }
-  }
-</script>
-<script type="module">
-  import * as THREE from "three";
-  import { SplatMesh } from "@sparkjsdev/spark";
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement)
-
-  const splatURL = "https://sparkjs.dev/assets/splats/butterfly.spz";
-  const butterfly = new SplatMesh({ url: splatURL });
-  butterfly.quaternion.set(1, 0, 0, 0);
-  butterfly.position.set(0, 0, -3);
-  scene.add(butterfly);
-
-  renderer.setAnimationLoop(function animate(time) {
-    renderer.render(scene, camera);
-    butterfly.rotation.y += 0.01;
-  });
-</script>
+<a-entity gaussian-splat="
+  url: path/to/file.spz;
+  opacity: 1.0;
+  splatScale: 1 1 1;
+  maxSplats: 0;
+"></a-entity>
 ```
 
-### Web Editor
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `url` | string | `''` | URL to the splat file (`.spz`, `.ply`, `.splat`) |
+| `opacity` | number | `1.0` | Global opacity (0–1) |
+| `splatScale` | vec3 | `1 1 1` | Scale of individual splats. Use `1 -1 -1` to flip Y/Z axes |
+| `maxSplats` | number | `0` | Max splats to render (0 = unlimited) |
 
-Remix the [glitch starter template](https://glitch.com/edit/#!/sparkjs-dev)
+---
 
-### CDN
+## Events
 
-```html
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.178.0/three.module.js",
-      "@sparkjsdev/spark": "https://sparkjs.dev/releases/spark/0.1.9/spark.module.js"
-     }
-  }
-</script>
+| Event | Detail | Description |
+|---|---|---|
+| `splat-loaded` | `{ mesh }` | Fired when the splat file finishes loading |
+| `splat-error` | `{ error }` | Fired if loading fails |
+
+```js
+el.addEventListener('splat-loaded', (e) => {
+  console.log('Loaded', e.detail.mesh.numSplats, 'splats');
+});
 ```
 
-### NPM
+---
 
-```shell
-npm install @sparkjsdev/spark
-```
+## Self-Hosting
 
-## Run Examples locally
+### Build from Source
 
-Install [Rust](https://www.rust-lang.org/tools/install) if it's not already installed in your machine.
+```bash
+# Clone the repo
+git clone https://github.com/YOUR_ORG/a-spark.git
+cd a-spark
 
-Next, build Spark by running:
-```
+# Install dependencies
 npm install
-npm run build
-```
-This will first build the Rust Wasm component (can be invoked via `npm run build:wasm`), then Spark itself (`npm run build`).
 
-The examples fetch assets from a remote URL. This step is optional, but offline development and faster loading times are possible if you download and cache the assets files locally with the following command:
-```
-npm run assets:download
+# Build (outputs to a-spark/dist/)
+node a-spark/build.js
 ```
 
-Once you've built Spark and optionally downloaded the assets, you can now run the examples:
-```
-npm start
-```
-This will run a dev server by default at [http://localhost:8080/](http://localhost:8080/). Check the console log output to see if yours is served on a different port.
+This produces:
+- `a-spark/dist/a-spark.js` — Full build (~813KB)
+- `a-spark/dist/a-spark.min.js` — Minified (~575KB)
 
-## Develop and contribute to the project
+### Deploy to Your Own CDN
 
-### Build troubleshooting
+Upload `a-spark.min.js` to any static host (Netlify, Vercel, Supabase Storage, GitHub Pages, etc.) and reference it via `<script>` tag.
 
-First try cleaning all the build files and re-building everything:
-```
-npm run clean
-npm install
-npm run build
-```
+---
 
-There's no versioning system for assets. If you need to re-download a specific file you can delete that asset file individually or download all assets from scratch:
+## How It Works
 
-```
- npm run assets:clean
- npm run assets:download
-```
+A-Spark takes the pre-built [Spark.js](https://github.com/sparkjsdev/spark) ES module and uses [esbuild](https://esbuild.github.io/) to:
 
-### Ignore dist directory during development
+1. Convert from ES module to IIFE (browser script)
+2. Rewire `import * as THREE from "three"` → `window.THREE` (A-Frame's bundled copy)
+3. Bundle the A-Frame component registration
 
-To ignore the dist directory and prevent accidental commits and merge conflicts
+The WASM sorting module is **embedded as base64** in the build — no separate `.wasm` file needed.
 
-```
-git update-index --assume-unchanged dist/*
-```
+---
 
-To revert and be able to commit into to the dist directory again:
+## Compatibility
 
-```
-git update-index --no-assume-unchanged dist/*
-```
+| Requirement | Version |
+|---|---|
+| A-Frame | 1.7.1+ |
+| Three.js | r173 (bundled with A-Frame 1.7.1) |
+| Browsers | Chrome 90+, Firefox 90+, Safari 16+, Quest Browser |
 
-To list ignored files in case of need to troubleshoot
+---
 
-```
-git ls-files -v | grep '^[a-z]' | cut -c3-
-```
+## Credits
 
-### Build docs and site
+- **[Spark.js](https://github.com/sparkjsdev/spark)** — The underlying Gaussian Splat renderer (MIT License)
+- **[A-Frame](https://aframe.io/)** — WebXR framework by the A-Frame team
+- **[esbuild](https://esbuild.github.io/)** — Lightning-fast bundler
 
-Install [Mkdocs Material](https://squidfunk.github.io/mkdocs-material/)
+---
 
-```
-pip install mkdocs-material
-```
+## License
 
-If you hit an `externally managed environment` error on macOS and if you installed python via `brew` try:
+MIT License — see [LICENSE](LICENSE) for details.
 
-```
-brew install mkdocs-material
-```
-
-Edit markdown in `/docs` directory
-
-```
-npm run docs
-```
-
-### Build Spark website
-
-Build the static site and docs in a `site` directory.
-
-```
-npm run site:build
-```
-
-You can run any static server in the `site` directory but for convenience you can run
-
-```
-npm run site:serve
-```
-
-### Deploy Spark website
-
-The following command will generate a static site from the `docs` directory and push it to the [repo](https://github.com/sparkjsdev/sparkjsdev.github.io) that hosts the site via `gh-pages`
-
-```
-npm run site:deploy
-```
-
-### Compress splats
-
-To compress a splat to [spz](https://scaniverse.com/spz) run
-
-`npm run assets:compress <file or URL to ply>`
+Based on Spark.js by [sparkjsdev](https://github.com/sparkjsdev).

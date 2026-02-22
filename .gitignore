@@ -1,10 +1,38 @@
+# === Dependencies ===
+node_modules/
+
+# === OS files ===
 *.DS_Store
+Thumbs.db
+
+# === Environment / Secrets ===
+.env
+.env.*
+.env.local
+
+# === Build artifacts (users should build locally) ===
+a-spark/dist/
+dist/
+
+# === extra files ===
+a-spark/test.html
+tsc_errors.txt
+
+# === IDE / editor ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === Original spark assets (not needed for A-Spark) ===
 examples/assets
 examples/js/vendor
 examples/showcase/assets
 docs/CNAME
-node_modules/
 site/
 site-repo/
 *.zip
 *.gltf
+
+# Local Netlify folder
+.netlify

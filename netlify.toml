@@ -1,0 +1,9 @@
+[build]
+  publish = "a-spark/dist"
+  command = "echo 'No build needed - static files'"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Cache-Control = "public, max-age=31536000, immutable"
